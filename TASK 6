@@ -1,1 +1,19 @@
+#include <stdio.h>
 
+int main(void)
+{
+    unsigned int household;
+    unsigned int previous, current;
+
+    printf("Enter household number, previous reading, current reading: ");
+
+    if (scanf("%u %u %u", &household, &previous, &current) != 3) {
+        fprintf(stderr, "Invalid input.\n");
+        return 1;
+    }
+
+    printf("Household %u: previous=%u current=%u\n",
+           household, previous, current);
+
+    return 0;
+}
