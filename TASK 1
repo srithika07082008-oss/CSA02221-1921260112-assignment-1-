@@ -1,1 +1,53 @@
+#include <stdio.h>
 
+#define SLAB1_UNITS 100
+#define SLAB2_UNITS 200
+#define RATE2_PAISE 225
+#define RATE3_PAISE 450
+#define FIXED_CHARGE_PAISE 5000LL
+
+int main(void)
+{
+    unsigned int household_number = 123;
+    char category = 'D';  /* Example: domestic */
+
+    unsigned int previous_reading = 1000;
+    unsigned int current_reading = 1150;
+    unsigned int units_consumed;
+
+    long long energy_charge_paise = 0;
+    long long fixed_charge_paise = FIXED_CHARGE_PAISE;
+    long long total_bill_paise;
+
+    if (current_reading >= previous_reading) {
+        units_consumed = current_reading - previous_reading;
+    } else {
+        /* Assumes a 16-bit meter rolled over once. */
+        units_consumed = 65535U - previous_reading + 1U + current_reading;
+    }
+
+    if (units_consumed > SLAB2_UNITS) {
+        energy_charge_paise +=
+            (long long)(units_consumed - SLAB2_UNITS) * RATE3_PAISE;
+        units_consumed = SLAB2_UNITS;
+    }
+
+    if (units_consumed > SLAB1_UNITS) {
+        energy_charge_paise +=
+            (long long)(units_consumed - SLAB1_UNITS) * RATE2_PAISE;
+    }
+
+    total_bill_paise = fixed_charge_paise + energy_charge_paise;
+
+    printf("Household: %u\n", household_number);
+    printf("Category: %c\n", category);
+    printf("Units consumed: %u\n", current_reading - previous_reading);
+    printf("Energy charge: Rs %lld.%02lld\n",
+           energy_charge_paise / 100, energy_charge_paise % 100);
+    printf("Fixed charge: Rs %lld.%02lld\n",
+           fixed_charge_paise / 100, fixed_charge_paise % 100);
+    printf("Total bill: Rs %lld.%02lld\n",
+           total_bill_paise / 100, total_bill_paise % 100);
+
+    return 0;
+}
