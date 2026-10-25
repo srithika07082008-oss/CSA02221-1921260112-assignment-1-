@@ -1,1 +1,22 @@
+#include <stdio.h>
+#include "billing.h"
 
+long long compute_bill(int units)
+{
+    long long paise = FIXED_CHARGE_PAISE;
+
+    if (units > SLAB2_UNITS) {
+        paise += (long long)(units - SLAB2_UNITS) * RATE3_PAISE;
+        units = SLAB2_UNITS;
+    }
+
+    if (units > SLAB1_UNITS) {
+        paise += (long long)(units - SLAB1_UNITS) * RATE2_PAISE;
+    }
+
+#ifdef DEBUG
+    fprintf(stderr, "Bill calculated: %lld paise\n", paise);
+#endif
+
+    return paise;
+}
