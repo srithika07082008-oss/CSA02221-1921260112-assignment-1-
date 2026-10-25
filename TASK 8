@@ -1,1 +1,13 @@
+#include <stdio.h>
 
+#define SQUARE(x) ((x) * (x))
+
+int main(void)
+{
+    int number = 5;
+
+    printf("Number: %d\n", number);
+    printf("Square: %d\n", SQUARE(number));
+
+    return 0;
+}
