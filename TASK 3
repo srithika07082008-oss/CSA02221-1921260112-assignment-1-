@@ -1,1 +1,50 @@
+#include <stdio.h>
 
+#define SLAB1_UNITS 100
+#define SLAB2_UNITS 200
+
+#define RATE1_PAISE 0
+#define RATE2_PAISE 225
+#define RATE3_PAISE 450
+
+#define FIXED_CHARGE_PAISE 5000LL
+
+long long compute_bill(int units)
+{
+    long long bill_paise = FIXED_CHARGE_PAISE;
+
+    /* Units above 200 cost Rs 4.50 each. */
+    if (units > SLAB2_UNITS) {
+        bill_paise += (long long)(units - SLAB2_UNITS) * RATE3_PAISE;
+    }
+
+    /* Units from 101 through 200 cost Rs 2.25 each. */
+    if (units > SLAB1_UNITS) {
+        int slab2_units = units;
+
+        if (slab2_units > SLAB2_UNITS) {
+            slab2_units = SLAB2_UNITS;
+        }
+
+        bill_paise +=
+            (long long)(slab2_units - SLAB1_UNITS) * RATE2_PAISE;
+    }
+
+    /* The first 100 units are free, so RATE1_PAISE is 0. */
+    return bill_paise;
+}
+
+int main(void)
+{
+    int readings[] = {0, 100, 150, 200, 350};
+    int count = (int)(sizeof readings / sizeof readings[0]);
+
+    for (int i = 0; i < count; i++) {
+        long long bill = compute_bill(readings[i]);
+
+        printf("%3d units -> Rs %lld.%02lld\n",
+               readings[i], bill / 100, bill % 100);
+    }
+
+    return 0;
+}
