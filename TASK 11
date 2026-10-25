@@ -1,1 +1,76 @@
+#include <stdio.h>
+#include <limits.h>
 
+#define METER_MAX 65535U
+
+#define SLAB1_UNITS 100U
+#define SLAB2_UNITS 200U
+
+#define RATE1_PAISE 0LL
+#define RATE2_PAISE 225LL
+#define RATE3_PAISE 450LL
+#define FIXED_CHARGE_PAISE 5000LL
+
+typedef unsigned short meter_t;
+
+static unsigned int calculate_units(meter_t previous, meter_t current)
+{
+    if (current >= previous) {
+        return (unsigned int)(current - previous);
+    }
+
+    /* One rollover of a 16-bit meter register. */
+    return (unsigned int)(METER_MAX - previous + 1U + current);
+}
+
+static long long calculate_bill(unsigned int units)
+{
+    long long energy_paise = 0;
+
+    if (units > SLAB2_UNITS) {
+        energy_paise +=
+            (long long)(units - SLAB2_UNITS) * RATE3_PAISE;
+        units = SLAB2_UNITS;
+    }
+
+    if (units > SLAB1_UNITS) {
+        energy_paise +=
+            (long long)(units - SLAB1_UNITS) * RATE2_PAISE;
+    }
+
+    return FIXED_CHARGE_PAISE + energy_paise;
+}
+
+int main(void)
+{
+    meter_t previous, current;
+    unsigned int units;
+    long long bill_paise;
+
+    if (USHRT_MAX != METER_MAX) {
+        fprintf(stderr,
+                "Error: this program requires a 16-bit unsigned short.\n");
+        return 1;
+    }
+
+    printf("Enter previous meter reading (0-%u): ", METER_MAX);
+    if (scanf("%hu", &previous) != 1) {
+        fprintf(stderr, "Invalid previous reading.\n");
+        return 1;
+    }
+
+    printf("Enter current meter reading (0-%u): ", METER_MAX);
+    if (scanf("%hu", &current) != 1) {
+        fprintf(stderr, "Invalid current reading.\n");
+        return 1;
+    }
+
+    units = calculate_units(previous, current);
+    bill_paise = calculate_bill(units);
+
+    printf("\nUnits consumed: %u\n", units);
+    printf("Energy and fixed charge total: Rs %lld.%02lld\n",
+           bill_paise / 100, bill_paise % 100);
+
+    return 0;
+}
