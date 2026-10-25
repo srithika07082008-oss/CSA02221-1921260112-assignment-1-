@@ -1,1 +1,102 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
 
+#define SLAB1_UNITS 100U
+#define SLAB2_UNITS 200U
+#define RATE1_PAISE 0LL
+#define RATE2_PAISE 225LL
+#define RATE3_PAISE 450LL
+#define FIXED_CHARGE_PAISE 5000LL
+
+typedef unsigned short meter_t;
+
+static unsigned int consumption(meter_t previous, meter_t current)
+{
+    return (unsigned int)((meter_t)(current - previous));
+}
+
+static long long compute_bill(unsigned int units)
+{
+    long long paise = FIXED_CHARGE_PAISE;
+
+    if (units > SLAB2_UNITS) {
+        paise += (long long)(units - SLAB2_UNITS) * RATE3_PAISE;
+        units = SLAB2_UNITS;
+    }
+
+    if (units > SLAB1_UNITS) {
+        paise += (long long)(units - SLAB1_UNITS) * RATE2_PAISE;
+    }
+
+    return paise;
+}
+
+static int read_uint(const char *prompt, unsigned int *value)
+{
+    char line[128];
+    char *end;
+    unsigned long parsed;
+
+    printf("%s", prompt);
+
+    if (fgets(line, sizeof line, stdin) == NULL) {
+        return 0;
+    }
+
+    parsed = strtoul(line, &end, 10);
+
+    if (end == line || parsed > UINT_MAX) {
+        return 0;
+    }
+
+    while (*end == ' ' || *end == '\t' || *end == '\r' || *end == '\n') {
+        end++;
+    }
+
+    if (*end != '\0') {
+        return 0;
+    }
+
+    *value = (unsigned int)parsed;
+    return 1;
+}
+
+int main(void)
+{
+    unsigned int household, previous_input, current_input;
+    meter_t previous, current;
+    unsigned int units;
+    long long bill;
+
+    if (USHRT_MAX != 65535U) {
+        fprintf(stderr, "This program expects a 16-bit unsigned short meter.\n");
+        return 1;
+    }
+
+    if (!read_uint("Household number: ", &household) ||
+        !read_uint("Previous reading (0-65535): ", &previous_input) ||
+        !read_uint("Current reading (0-65535): ", &current_input)) {
+        fprintf(stderr, "Invalid input.\n");
+        return 1;
+    }
+
+    if (previous_input > USHRT_MAX || current_input > USHRT_MAX) {
+        fprintf(stderr, "Meter readings must be between 0 and 65535.\n");
+        return 1;
+    }
+
+    previous = (meter_t)previous_input;
+    current = (meter_t)current_input;
+
+    units = consumption(previous, current);
+    bill = compute_bill(units);
+
+    printf("\nHousehold: %u\n", household);
+    printf("Units consumed: %u\n", units);
+    printf("Fixed charge: Rs %lld.%02lld\n",
+           FIXED_CHARGE_PAISE / 100, FIXED_CHARGE_PAISE % 100);
+    printf("Total bill: Rs %lld.%02lld\n", bill / 100, bill % 100);
+
+    return 0;
+}
