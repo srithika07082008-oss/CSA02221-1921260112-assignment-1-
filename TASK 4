@@ -1,1 +1,42 @@
+#ifndef BILLING_H
+#define BILLING_H
 
+#define SLAB1_UNITS 100
+#define SLAB2_UNITS 200
+#define RATE1_PAISE 0
+#define RATE2_PAISE 225
+#define RATE3_PAISE 450
+#define FIXED_CHARGE_PAISE 5000LL
+
+long long compute_bill(int units);
+
+#endif
+
+#include <stdio.h>
+
+// 1. Add the main function execution entry point
+int main() {
+    int units = 150; // Example input
+    long long total_bill = compute_bill(units);
+    
+    printf("Total bill for %d units is %lld paise.\n", units, total_bill);
+    return 0;
+}
+
+// 2. Implement your billing calculation logic
+long long compute_bill(int units) {
+    long long bill = FIXED_CHARGE_PAISE;
+    
+    if (units <= SLAB1_UNITS) {
+        bill += (long long)units * RATE1_PAISE;
+    } else if (units <= SLAB1_UNITS + SLAB2_UNITS) {
+        bill += (long long)SLAB1_UNITS * RATE1_PAISE;
+        bill += (long long)(units - SLAB1_UNITS) * RATE2_PAISE;
+    } else {
+        bill += (long long)SLAB1_UNITS * RATE1_PAISE;
+        bill += (long long)SLAB2_UNITS * RATE2_PAISE;
+        bill += (long long)(units - SLAB1_UNITS - SLAB2_UNITS) * RATE3_PAISE;
+    }
+    
+    return bill;
+}
