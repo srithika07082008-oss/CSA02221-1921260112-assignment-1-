@@ -1,1 +1,49 @@
+#include <stdint.h>
+#include <stdio.h>
 
+typedef struct {
+    uint64_t first_slab_wh;
+    uint64_t second_slab_wh;
+    int64_t rate1_paise_per_kwh;
+    int64_t rate2_paise_per_kwh;
+    int64_t rate3_paise_per_kwh;
+    int64_t fixed_charge_paise;
+    int peak_start_hour;  /* inclusive: 18 */
+    int peak_end_hour;    /* exclusive: 22 */
+} Tariff;
+
+static int64_t interval_charge_paise(uint64_t watt_hours,
+                                     int hour,
+                                     int64_t rate_paise_per_kwh,
+                                     int is_peak)
+{
+    /*
+     * One kWh = 1000 Wh.
+     * Multiply energy by rate, then divide by 1000 to get paise.
+     * Apply 20% peak premium as 6/5, rounding to nearest paise.
+     */
+    uint64_t numerator = watt_hours * (uint64_t)rate_paise_per_kwh;
+    int64_t charge = (int64_t)((numerator + 500U) / 1000U);
+
+    if (is_peak) {
+        charge = (charge * 6 + 2) / 5; /* nearest paise */
+    }
+
+    return charge;
+}
+
+int main(void)
+{
+    const int hour = 19;
+    const int peak = (hour >= 18 && hour < 22);
+    const uint64_t interval_wh = 1250;
+    const int64_t rate_paise_per_kwh = 450;
+
+    int64_t charge = interval_charge_paise(interval_wh,
+                                           hour,
+                                           rate_paise_per_kwh,
+                                           peak);
+
+    printf("Interval charge: %lld paise\n", (long long)charge);
+    return 0;
+}
