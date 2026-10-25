@@ -1,1 +1,26 @@
+#include <stdio.h>
 
+int main(void)
+{
+    /* Example 1: integer division discards the fraction. */
+    printf("5 / 2 = %d\n", 5 / 2);
+
+    /* Example 2: casting after division does not restore the fraction. */
+    printf("(float)(5 / 2) = %.2f\n", (float)(5 / 2));
+
+    /* Example 3: cast before division to keep the fractional result. */
+    printf("(float)5 / 2 = %.2f\n", (float)5 / 2);
+
+    /* Exact money calculation: 150 units costs Rs 162.50. */
+    int units = 150;
+    long long charge_paise = 5000LL; /* Rs 50 fixed charge */
+
+    if (units > 100) {
+        charge_paise += (long long)(units - 100) * 225LL;
+    }
+
+    printf("Bill = Rs %lld.%02lld\n",
+           charge_paise / 100, charge_paise % 100);
+
+    return 0;
+}
